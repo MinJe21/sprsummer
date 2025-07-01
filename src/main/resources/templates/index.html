@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+</head>
+<body>
+index 입니다!!
+<a href="javascript:test()">rest ctrl 확인!!</a>
+
+<div>
+    1. 숫자 2개 보내서 곱한 값 아작스로 받아보기!!
+</div>
+<div>
+    a : <input type="number" id="input_a"/> <br/>
+    b : <input type="number" id="input_b"/> <br/>
+    <button onclick="multiple()">결과보기!!</button>
+    결과는? <p id="p_result">-</p>
+</div>
+<div>
+    2. id랑 pw 보내보고, 아이디 1234 비번 1111 인 경우에만 성공 메세지 받기!
+
+    id : <input type="text" id="input_id"/> <br/>
+    pw : <input type="text" id="input_pw"/> <br/>
+    <button onclick="login()">로그인</button>
+</div>
+
+<script>
+    let userId = localStorage.getItem("userId");
+    if(userId == null){
+        alert("로그인 안됨..")
+    } else {
+        alert("로그인 : " + userId);
+    }
+
+    function login(){
+        $.ajax({
+            url: "/api/login",
+            method: "GET",
+            data:{
+                id : $("#input_id").val(),
+                pw : $("#input_pw").val()
+            },
+            success: (data, status, xhr)=>{
+                let tempStatus = data["status"];
+                alert(tempStatus);
+                if(tempStatus + "" === "200"){
+                    //성공
+                    alert("성공!!");
+                } else {
+                    //실패
+                    alert("실패!!");
+                }
+                //$("#p_result").html(result);
+            },
+            error: (data, status, xhr)=>{
+                alert(JSON.stringify(data));
+
+            },
+        });
+    }
+    function multiple(){
+        $.ajax({
+            url: "/api/multiple",
+            method: "GET",
+            data:{
+                a : $("#input_a").val(),
+                b : $("#input_b").val()
+            },
+            success: (data, status, xhr)=>{
+                let result = data["result"];
+                //$("#p_result").html(result);
+                $("#p_result").text(result);
+            },
+            error: (data, status, xhr)=>{
+                alert(JSON.stringify(data));
+
+            },
+        });
+    }
+    function test(){
+        $.ajax({
+            url: "/api/test",
+            method: "GET",
+            data:{
+                a : 123,
+                b : 234
+            },
+            success: (data, status, xhr)=>{
+                alert(JSON.stringify(data));
+            },
+            error: (data, status, xhr)=>{
+                alert(JSON.stringify(data));
+
+            },
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+</head>
+<body>
+plist
+<div>
+    callpage : <input type="number" id="input_callpage"/><br/>
+    perpage : <input type="number" id="input_perpage"/><br/>
+    orderby :
+    <select id="input_orderby">
+        <option value="id">시간순</option>
+        <option value="title">제목 가나다순</option>
+    </select><br/>
+    orderway :
+    <select id="input_orderway">
+        <option value="DESC">역순</option>
+        <option value="ASC">정순</option>
+    </select><br/>
+    <input type="text" id="search_title"/>
+    <select id="search_deleted">
+        <option value="">전체</option>
+        <option value="false">일반</option>
+        <option value="true">삭제</option>
+    </select>
+    <button onclick="plistBoard()">목록 보기!</button>
+</div>
+<div>총 글 수 : <font class="font_board_listsize">-</font></div>
+<div id="div_list">
+</div>
+
+<div id="div_paging">
+</div>
+
+<script>
+    function listener_page(callpage){
+        $("#input_callpage").val(callpage);
+        plistBoard();
+    }
+    function location_href(id){
+        //alert(id);
+        location.href = "/board/detail/" + id;
+    }
+    function plistBoard(){
+        let deleted = null;
+        let search_deleted = $("#search_deleted").val();
+        if(search_deleted !== ""){
+            deleted = (search_deleted === "true");
+        }
+
+        $.ajax({
+            url: "/api/board/pagedList",
+            method: "GET",
+            data:{
+                deleted : deleted
+                , title : $("#search_title").val()
+                , callpage : $("#input_callpage").val()
+                , perpage : $("#input_perpage").val()
+                , orderway : $("#input_orderway").val()
+                , orderby : $("#input_orderby").val()
+            },
+            success: (data, status, xhr)=> {
+                //alert(JSON.stringify(data));
+
+                $(".font_board_listsize").text(data["listsize"]);
+                $("#input_callpage").val(data["callpage"]);
+                $("#input_perpage").val(data["perpage"]);
+
+                let list = data["list"];
+                $("#div_list").html("");
+                for (let each of list) {
+                    $("#div_list").append(
+                        "<div onclick='location_href(" + each["id"] + ")'>" + each["id"] + "====" + each["title"] + "</div>"
+                    );
+                }
+
+                let callpage = Number(data["callpage"]); //3
+                let totalpage = Number(data["totalpage"]); // 10
+
+                $("#div_paging").html("");
+                $("#div_paging").append(
+                    '<a href="javascript:listener_page('+1+')">'+ '<<' +'</a>'
+                );
+
+                for(let i=0;i<5;i++){
+                    let tempPage = callpage - 5 + i;
+                    if(tempPage > 0 && tempPage <= totalpage){
+                        $("#div_paging").append(
+                            '<a href="javascript:listener_page('+tempPage+')">'+ '&nbsp;'+ tempPage +'&nbsp;'+'</a>'
+                        );
+                    }
+                }
+                //현재 페이지!!
+                $("#div_paging").append(
+                    '<a href="javascript:listener_page('+callpage+')">'+ '('+ callpage +')'+'</a>'
+                );
+
+                for(let i=0;i<5;i++){
+                    let tempPage = callpage + 1 + i;
+                    if(tempPage > 0 && tempPage <= totalpage){
+                        $("#div_paging").append(
+                            '<a href="javascript:listener_page('+tempPage+')">'+ '&nbsp;'+ tempPage +'&nbsp;'+'</a>'
+                        );
+                    }
+                }
+
+                $("#div_paging").append(
+                    '<a href="javascript:listener_page('+totalpage+')">'+ '>>' +'</a>'
+                );
+
+                /*
+                << 1 2 (3) 4 5 6 7 8 >>
+                 */
+
+
+                /*$("#div_list").html("");
+                for(let each of data){
+                    $("#div_list").append(
+                        "<div onclick='location_href("+each["id"]+")'>"+ each["id"]  + "====" + each["title"]+"</div>"
+                    );
+                }*/
+            },
+            error: (data, status, xhr) => {
+                alert(JSON.stringify(data));
+            },
+        });
+    }
+</script>
+</body>
+</html>
