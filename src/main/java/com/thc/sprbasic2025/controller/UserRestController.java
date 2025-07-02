@@ -18,10 +18,19 @@ public class UserRestController {
         this.userService = userService;
     }
 
+    private final String prefix = "Bearer ";
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login(@RequestBody UserDto.LoginReqDto params){
+        UserDto.LoginResDto res = userService.login(params);
+        return ResponseEntity.status(HttpStatus.OK).header("RefreshToken", prefix + res.getRefreshToken()).build();
+    }
+    /*
     @PostMapping("/login")
     public ResponseEntity<DefaultDto.CreateResDto> login(@RequestBody UserDto.LoginReqDto params){
         return ResponseEntity.ok(userService.login(params));
     }
+    */
     @PostMapping("/signup")
     public ResponseEntity<DefaultDto.CreateResDto> signup(@RequestBody UserDto.CreateReqDto params){
         return ResponseEntity.ok(userService.create(params));
