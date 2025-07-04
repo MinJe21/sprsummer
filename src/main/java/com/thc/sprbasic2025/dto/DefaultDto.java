@@ -3,10 +3,22 @@ package com.thc.sprbasic2025.dto;
 import com.thc.sprbasic2025.domain.Board;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.beans.BeanUtils;
 
 import java.util.List;
 
 public class DefaultDto {
+
+    @Getter @Setter @SuperBuilder @NoArgsConstructor @AllArgsConstructor
+    public static class BaseDto {
+        String empty; // 필드가 아무것도 없으면 상속한 후 빌드가 잘 안되어요..
+        public BaseDto afterBuild(BaseDto param) {
+            //param => reqDto 를 넣어주면!!
+            BeanUtils.copyProperties(param, this);
+            //this 인 서비스 디티오를 돌려줍니다! 안에 있는 모든 필드값 카피도 해줍니다!
+            return this;
+        }
+    }
 
     @Getter @Setter @SuperBuilder @NoArgsConstructor @AllArgsConstructor
     public static class CreateResDto {
@@ -14,7 +26,7 @@ public class DefaultDto {
     }
 
     @Getter @Setter @SuperBuilder @NoArgsConstructor @AllArgsConstructor
-    public static class UpdateReqDto {
+    public static class UpdateReqDto extends BaseDto{
         Long id;
         Boolean deleted;
     }

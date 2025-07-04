@@ -39,6 +39,11 @@ public class BoardServiceimpl implements BoardService {
 
     @Override
     public DefaultDto.CreateResDto create(BoardDto.CreateReqDto param) {
+        if(param.getUserId() == null){
+            //로그인 한 상태에서만 쓰도록!
+            throw new RuntimeException("not enough parameter");
+        }
+
         DefaultDto.CreateResDto res = boardRepository.save(param.toEntity()).toCreateResDto();
         for(String each : param.getImgs()){
             boardimgService.create(BoardimgDto.CreateReqDto.builder().boardId(res.getId()).url(each).build());
@@ -47,11 +52,23 @@ public class BoardServiceimpl implements BoardService {
     }
 
     @Override
-    public void update(BoardDto.UpdateReqDto param) {
+    public void update(BoardDto.UpdateServDto param) {
         Board board = boardRepository.findById(param.getId()).orElse(null);
         if(board == null){
             throw new RuntimeException("no data");
         }
+
+        Long reqUserId = param.getReqUserId();
+        if(reqUserId == null){
+            //로그인 한 상태에서만 쓰도록!
+            throw new RuntimeException("not logged in");
+        }
+        if(!reqUserId.equals(board.getUserId())){
+            // 본인 거 아닌데 왜 수정하려고 하지? 돌려보내자!
+            throw new RuntimeException("not author matched");
+        }
+
+
         if(param.getDeleted() != null){ board.setDeleted(param.getDeleted()); }
         if(param.getUserId() != null){ board.setUserId(param.getUserId()); }
         if(param.getTitle() != null){ board.setTitle(param.getTitle()); }
@@ -62,7 +79,7 @@ public class BoardServiceimpl implements BoardService {
 
     @Override
     public void delete(DefaultDto.DeleteReqDto param) {
-        update(BoardDto.UpdateReqDto.builder().id(param.getId()).deleted(true).build());
+        update(BoardDto.UpdateServDto.builder().id(param.getId()).deleted(true).build());
     }
 
     @Override
@@ -84,9 +101,6 @@ public class BoardServiceimpl implements BoardService {
 
         Boardlike boardlike = boardlikeRepository.findByDeletedAndBoardIdAndUserId(false ,res.getId(), param.getUserId());
         res.setLiked(boardlike != null);
-
-
-
         return res;
     }
 

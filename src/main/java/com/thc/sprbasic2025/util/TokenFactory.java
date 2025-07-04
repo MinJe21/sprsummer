@@ -40,6 +40,10 @@ public class TokenFactory {
         return null;
     }
 
+    public Long validateAccessToken(String key){
+        return validate(key);
+    }
+
     public String generate(Long id, String type){
         String returnData = null;
         String duedate = null;

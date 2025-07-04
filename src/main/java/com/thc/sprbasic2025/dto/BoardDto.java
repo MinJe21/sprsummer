@@ -31,6 +31,13 @@ public class BoardDto {
         String content;
         Integer countread;
     }
+    @Getter @Setter @SuperBuilder @NoArgsConstructor @AllArgsConstructor
+    public static class UpdateServDto extends UpdateReqDto{
+        Long reqUserId;
+    }
+
+
+
     /*@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
     public static class DeleteReqDto {
         Long id;
